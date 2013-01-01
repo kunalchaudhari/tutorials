@@ -1,8 +1,8 @@
-Backup your rails db with backup gem
-============================================
+Backup your rails app db with backup gem
+========================================
 Database backup is very vital once your application is in production. Nasty things can happen and it can turn into disaster if you loose your data.
 
-Here i will walk you through taking db backup using ```backup``` gem and automating backup using ```whenever``` gem.
+Here i will walk you through taking db backup using ```backup``` gem.
 
 There are [handful](https://www.ruby-toolbox.com/categories/backups) of gems available to achieve this. But [backup](https://github.com/meskyanichi/backup) is most active of them and packed with features. To list out some them:
 
@@ -14,26 +14,22 @@ There are [handful](https://www.ruby-toolbox.com/categories/backups) of gems ava
 
 It has great [README](https://github.com/meskyanichi/backup#readme) and [wiki](https://github.com/meskyanichi/backup/wiki). I highly recommend to read them.
 
-How to configure backup?
-------------------------
-Backup has handy generator to generate config file. Where you setup which database to take backup, where to take backup, where to notify when backup done, how to compress backup and many things.
+
+Now we need to take backup for our rails app. Our requirement are as follow:
+
+* We will be taking backup for our Postgresql db
+* Compress db backup with gzip
+* Encrypt db backup with openssl
+* Store that backup on Amazon S3
+* Notified via email when backup done
 
 So let's start. 
 
-We'll be using following setup for our rails app:
-* Database: Postgresql
-* Backup storage: Amazon S3
-* Notification: mail
-* Compressor: gzip
-* Encryptor: openssl
-
-add backup gem to your Gemfile. 
+First of all add backup gem to your Gemfile.
 
 ```
 gem backup
-```
-```
-bundle install
+$ bundle install
 ```
 
 Now run the generator provided by backup to generate config file.
@@ -42,24 +38,28 @@ Now run the generator provided by backup to generate config file.
 $ cd /path/to/rails/app
 ```
 ```
-$ bundle exec backup generate:model --trigger rails_db_backup --databases="postgresql" --storages="s3" --encryptors="openssl" --compressors="gzip" --notifiers="mail"
+$ bundle exec backup generate:model --trigger rails_db_backup \
+              --databases="postgresql" --storages="s3" \
+              --encryptors="openssl" --compressors="gzip" --notifiers="mail"
 ```
 
-This will generate two config file at ```~/Backup/``` (the default location). One is a main configuration file where you can add common configuration for all your models. And another config is located at ```~/Backup/models/``` directory. In our case it will be ```~/Backup/models/rails_db_backup.rb```. Models are ```backup``` way of defining different backup configuration. So you can run them independently or in combination with each other. 
+This will generate two config file at ```~/Backup/``` (the default location). One is a main configuration file which has common configuration for all your models. This file will load other configurations from ```~/Backup/models/```. In our case it will be ```~/Backup/models/rails_db_backup.rb```. 
 
-Let us see the model configuration file. Main configuration doesn't do much than loading all model configs by default.
+Note: Models are ```backup``` way of defining different backup configuration. So you can run them independently or in combination with each other. 
+
+Let's see model configuration file. Main configuration doesn't do much than loading all model configs by default.
 
 File will look like this
 
 ```
 Backup::Model.new(:rails_db_backup, 'Description for rails_db_backup') do
 
-  split_into_chunks_of 250
+  split_into_chunks_of 4000
 
   database PostgreSQL do |db|
-    db.name               = "sweetly_us_development"
-    db.username           = "kokanidivyesh"
-    db.password           = ""
+    db.name               = "sweetly_us_production"
+    db.username           = "app"
+    db.password           = "secret"
     db.host               = "localhost"
     # db.port               = 5432
     # db.socket             = "/tmp/pg.sock"
@@ -75,16 +75,16 @@ Backup::Model.new(:rails_db_backup, 'Description for rails_db_backup') do
   # checkout http://aws.amazon.com/s3 for more info
   #
   store_with S3 do |s3|
-    s3.access_key_id     = "my_access_key_id"
-    s3.secret_access_key = "my_secret_access_key"
+    s3.access_key_id     = "SKIAKL97GE7ZI3ZCXM2A"
+    s3.secret_access_key = "DSJUAW9n8rQNIRw8EgXlQai6qZfcr6rYnipGCjFq"
     s3.region            = "us-east-1"
-    s3.bucket            = "my-bucket" 
+    s3.bucket            = "sweetlyus.dbbackups" 
     s3.path              = "/backups"
     s3.keep              = 10
   end
 
   encrypt_with OpenSSL do |encryption|
-    encryption.password      = "my_password"            # From String
+    encryption.password      = "secret"            # From String
     # encryption.password_file = "/path/to/password/file" # Or from File
     encryption.base64        = true
     encryption.salt          = true
@@ -103,7 +103,7 @@ Backup::Model.new(:rails_db_backup, 'Description for rails_db_backup') do
     mail.port                 = 587
     mail.domain               = "sweetly.us"
     mail.user_name            = "no-reply@sweetly.us"
-    mail.password             = "$weetly10"
+    mail.password             = "secret"
     mail.authentication       = "plain"
     mail.enable_starttls_auto = true
   end
@@ -113,11 +113,11 @@ end
 
 Let see one by one:
 
-split_into_chunks_of line will tell to split the backup in chunk if size is greater than 250MB. This is helpful when you have large backup and you want to split it. For example Amazon allows max 5GB of data to be uploaded to S3.
-
 It has handy methods for defining configuration for database, storage, notification and encryption. All are self-explanatory. Checkout above file where i have filled all relevant details.
 
-By default, Backup will look for this file in ```~/Backup/config.rb```. If you want to place your configuration files in a different location, use the --config_file option: ```bundle exec backup perform --trigger my_backup --config_file '/path/to/config.rb'```
+```split_into_chunks_of``` will tell to split the backup in chunk if size is greater than 4GB. This is helpful when you have large backup and you want to split it. For example Amazon allows max 5GB of data to be uploaded to S3.
+
+By default, Backup will look for this file in ```~/Backup/config.rb```. You can place your configuration files in a different location. If you place file at different location use the --config_file option: ```bundle exec backup perform --trigger my_backup --config_file '/path/to/config.rb'```
 
 ```bundle exec backup generate:model``` has various options you can specify to generate file at custom locations. ```backup help generate:model``` will give you all info.
 
@@ -143,3 +143,17 @@ cd path/to/your/rails_app
 '''
 bundle exec backup perform -t rails_db_backup
 ```
+
+That's it.
+
+Logs
+----
+Backup keeps a log with information about all the backups it performs. The log contains various informational messages, any warnings that may be issued and any errors which occur during the process. By default, the log file is stored in the ```~/Backup/log``` directory. If you would like to store the log for your backup in another location, then specify an alternate ````--log-path``` on the command line:
+
+For all other options you can pass to ```backup perform``` can be found here: [https://github.com/meskyanichi/backup/wiki/Performing-Backups](https://github.com/meskyanichi/backup/wiki/Performing-Backups).
+
+I have touched only little about backup here. Checkout [https://github.com/meskyanichi/backup](https://github.com/meskyanichi/backup) for all available features.
+
+Conclusion
+----------
+Backup is gem that enables you to easily perform backup operations. It has built-in support for various databases, storage protocols/services, syncers, compressors, encryptors and notifiers which you can mix and match. For example, With the Syncers you can transfer directories of data from the production server to the backup server. This is extremely useful to take backup of your images, music, videos or other heavy file formats.
