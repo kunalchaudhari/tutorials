@@ -121,7 +121,7 @@ How backup Works with above configuration?
 ------------------------------------------
 
 * First, it will dump the PostgreSQL using pg_dump.
-* Than PostgreSQL dump will be piped through the Gzip Compressor into rails_db_backup/databases/PostgreSQL/sweetly_us_development.sql.gz. 
+* Than PostgreSQL dump will be piped through the Gzip Compressor into ~/Backup/.tmp/rails_db_backup/databases/PostgreSQL/sweetly_us_development.sql.gz. 
 * Finally, the rails_db_backup directory will be packaged into tar archive, which will be piped through the OpenSSL Encryptor to encrypt this final package into YYYY-MM-DD-hh-mm-ss.rails_db_backup.tar.enc. 
 * This final encrypted archive will then be transferred to your Amazon S3 account. 
 * If all goes well, and no exceptions are raised, you'll be notified via the mail notifier that the backup succeeded. 
@@ -156,4 +156,4 @@ Since Backup is an easy-to-use command line utility, you should write a crontask
 
 Conclusion
 ----------
-Backup is gem that enables you to easily perform backup operations. It has built-in support for various databases, storage protocols/services, syncers, compressors, encryptors and notifiers which you can mix and match. For example, With the Syncers you can transfer directories of data from the production server to the backup server. This is extremely useful to take backup of your images, music, videos or other heavy file formats.
+Backup is gem that enables you to easily perform backup operations. It has built-in support for various databases, storage protocols/services, syncers, compressors, encryptors and notifiers which you can mix and match. For example, With the [Syncers](https://github.com/meskyanichi/backup/wiki/Syncers) you can transfer directories of data from the production server to the backup server. This is extremely useful to take backup of your images, music, videos or other heavy file formats.
