@@ -9,7 +9,7 @@ There are [handful](https://www.ruby-toolbox.com/categories/backups) of gems ava
 * Database Support [mysql, postgresql, mongoDB, redis, Riak]
 * Storage Support [Amazon S3, Rackspace cloud files, Drop box and [lots more](https://github.com/meskyanichi/backup/wiki/Storages)]
 * Compressors Support [Gzip, Bzip2, Pbzip2, Lzma]
-* Notifications [Mail, Twitter, Campfire and what not. [Check all here](https://github.com/meskyanichi/backup/wiki/Notifiers])]
+* Notifications [Mail, Twitter, Campfire and what not. [Check all here](https://github.com/meskyanichi/backup/wiki/Notifiers)]
 * Ruby support: 1.9.3, 1.9.2, 1.8.7
 
 It has great [README](https://github.com/meskyanichi/backup#readme) and [wiki](https://github.com/meskyanichi/backup/wiki). I highly recommend to read them.
