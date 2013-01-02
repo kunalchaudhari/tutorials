@@ -157,3 +157,12 @@ Since Backup is an easy-to-use command line utility, you should write a crontask
 Conclusion
 ----------
 Backup is gem that enables you to easily perform backup operations. It has built-in support for various databases, storage protocols/services, syncers, compressors, encryptors and notifiers which you can mix and match. For example, With the [Syncers](https://github.com/meskyanichi/backup/wiki/Syncers) you can transfer directories of data from the production server to the backup server. This is extremely useful to take backup of your images, music, videos or other heavy file formats.
+
+Tips
+----
+* You can place config file at custom location. Just need to pass ```---config-path '/path/to/config/path'``` option when running backup.
+* Backup comes with command line utility. So you can use it with cron jobs automate backups.
+* ```backup help generate:model``` will help you list all the available option to specify your path preference.
+* With [Syncers](https://github.com/meskyanichi/backup/wiki/Syncers) you can mirror your production server on your backup server.
+* Database::Pipeline error can arise if you have prob with PostgreSql config. Try to do manual pg_dump and make it work. Than place those setting in your model config to make it work.
+* There are a [lot of other dependencies](https://github.com/meskyanichi/backup/blob/develop/lib/backup/dependency.rb#L17-85) that are NOT installed when you install the Backup gem. This is because it may conflict with gems in your environment and will literally put you in "dependency hell". When you manually try to run your backup later, Backup will check what dependencies are required to perform your backup and guide you through the installation process by providing all the commands you need to run. It's easy and self-explanatory once you try to run a backup for the first time, so don't worry
