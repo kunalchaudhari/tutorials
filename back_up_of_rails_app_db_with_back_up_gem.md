@@ -47,7 +47,7 @@ This will generate two config file at ```~/Backup/``` (the default location.). O
 
 Note: Models are ```backup``` way of defining different backup configuration. So you can run them independently or in combination with each other. 
 
-Let's see model configuration file. 
+Let's have a look at ```~/Backup/models/rails_db_backup.rb``` configuration file. 
 
 ```
 Backup::Model.new(:rails_db_backup, 'Description for rails_db_backup') do
